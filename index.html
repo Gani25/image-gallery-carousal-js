@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Slider</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+
+        }
+
+        h1 {
+            margin-top: 30px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 600px;
+        }
+
+        .slider {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .slides {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slides img {
+            width: 100%;
+            border-radius: 10px;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        /* Navigation buttons */
+        .prev,
+        .next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 18px;
+        }
+
+        .prev {
+            left: 10px;
+        }
+
+        .next {
+            right: 10px;
+        }
+
+        /* Dots */
+        .dots {
+            text-align: center;
+            position: absolute;
+            bottom: 15px;
+            width: 100%;
+        }
+
+        .dot {
+            height: 12px;
+            width: 12px;
+            margin: 0 5px;
+            display: inline-block;
+            background: #bbb;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .active {
+            background: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 align="center">Image Slider</h1>
+    <div class="container">
+
+        <div class="slider" tabindex="0"><!-- tabindex makes it focusable for keyboard -->
+            <div class="slides">
+                <img src="https://picsum.photos/id/1015/800/400" alt="Image 1">
+                <img src="https://picsum.photos/id/1016/800/400" alt="Image 2">
+                <img src="https://picsum.photos/id/1018/800/400" alt="Image 3">
+                <img src="https://picsum.photos/id/1020/800/400" alt="Image 4">
+            </div>
+
+            <button class="prev">&#10094;</button>
+            <button class="next">&#10095;</button>
+
+            <div class="dots"></div>
+        </div>
+    </div>
+
+    <script>
+        // Get the DOM elements we need
+        const slides = document.querySelector('.slides');            // the moving strip
+        const images = document.querySelectorAll('.slides img');     // NodeList of all images (slides)
+        const prev = document.querySelector('.prev');                // left button
+        const next = document.querySelector('.next');                // right button
+        const dotsContainer = document.querySelector('.dots');       // where dots will go
+        const slider = document.querySelector('.slider');            // the moving strip
+
+        let index = 0;                       // which slide is currently visible (0-based)
+        const total = images.length;         // how many slides there are
+
+        // Create dots (one dot per slide) and attach click handler to each
+        for (let i = 0; i < total; i++) {
+            const dot = document.createElement('span');  // create element for dot
+            dot.classList.add('dot');                   // give it the dot class
+            if (i === 0) dot.classList.add('active');   // make first dot active initially
+            // when user clicks dot, jump to slide i
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);             // add to DOM
+        }
+        // After appending dots we can select them as a NodeList
+        const dots = document.querySelectorAll('.dot');
+
+        // Move slides strip to show the current index and update active dot
+        function updateSlide() {
+            // move the .slides strip left by index * 100%
+            // (this is the common approach — works because each slide fills the viewport)
+            slides.style.transform = `translateX(${-index * 100}%)`;
+            console.log("Update Slide INDEX = ", index);
+            console.log("Transform Value = ", -index * 100, " %");
+
+            // update dot active state visually
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[index].classList.add('active');
+        }
+
+        // go to next slide (wrap-around using modulo)
+        function nextSlide() {
+            index = (index + 1) % total;   // if index reaches total, it becomes 0
+            console.log("INDEX = ", index);
+            updateSlide();
+        }
+
+        // go to previous slide (wrap-around, safe from negatives)
+        function prevSlide() {
+            index = (index - 1 + total) % total;  // add total to keep non-negative
+            updateSlide();
+        }
+
+        // jump to a specific slide
+        function goToSlide(i) {
+            index = i;
+            updateSlide();
+        }
+
+        // wire up the arrow buttons
+        // next.addEventListener('click', nextSlide);
+        // prev.addEventListener('click', prevSlide);
+
+        function startAutoSlide() {
+            autoSlide = setInterval(nextSlide, 3000);
+        }
+
+        function stopAutoSlide() {
+            clearInterval(autoSlide);
+        }
+
+        next.addEventListener('click', nextSlide);
+        prev.addEventListener('click', prevSlide);
+
+        // Keyboard navigation
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "ArrowRight") nextSlide();
+            if (e.key === "ArrowLeft") prevSlide();
+        });
+
+        // Pause on hover
+        slider.addEventListener('mouseenter', stopAutoSlide);
+        slider.addEventListener('mouseleave', startAutoSlide);
+
+        // Start auto-slide
+        startAutoSlide();
+
+        // Auto-advance every 3 seconds (3,000 ms)
+        // setInterval(nextSlide, 3000);
+
+    </script>
+</body>
+
+</html>
